@@ -1,0 +1,4 @@
+en:
+  reload_modules: reload modules
+  enable_grammar: enable <g> grammar
+  disable_grammar: disable <g> grammar
