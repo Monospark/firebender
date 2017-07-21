@@ -20,8 +20,8 @@ if not os.path.isabs(config["config_dir"]):
 
 absolute_excluded_files = [os.path.join(absolute_modules_directory, e) for e in config["excluded"]]
 
-absolute_translations_directory = os.path.join(absolute_modules_directory, "translations")
-i18n.load_path.append(absolute_translations_directory)
+i18n.load_path.append(os.path.join(root_path, "translations"))
+i18n.load_path.append(os.path.join(absolute_modules_directory, "translations"))
 i18n.set('locale', config["locale"])
 i18n.set('fallback', 'en')
 
