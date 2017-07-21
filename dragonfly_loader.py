@@ -3,8 +3,12 @@ import os
 import pkgutil
 import imp
 import traceback
+
+import dragonfly
 import i18n
 from dragonfly import *
+
+import wsr_callbacks
 from json_parser import parse_file
 
 
@@ -124,6 +128,33 @@ def __unload_modules():
         del module
 
 
+def __create_callbacks():
+    print("\nCreating callbacks:")
+    callbacks = []
+    for unit in __get_units():
+        print(" - %s" % unit.name)
+        callbacks.extend(__call_function(unit, "create_callbacks"))
+
+    if __engine_type == NATLINK:
+        for c in callbacks:
+            func, interval = c
+            dragonfly.timer.timer.add_callback(func, interval)
+
+    if __engine_type == WSR:
+        wsr_callbacks.init_callbacks(callbacks)
+
+
+def __destroy_callbacks():
+    print("\nDestroying callbacks:")
+
+    if __engine_type == NATLINK:
+        for c in list(dragonfly.timer.timer.callbacks):
+            dragonfly.timer.timer.remove_callback(c.function)
+
+    if __engine_type == WSR:
+        wsr_callbacks.destroy_callbacks()
+
+
 def __load_grammars():
     print("\nLoading grammars:")
     for unit in [u for u in __get_units() if u.grammar_name is not None]:
@@ -184,8 +215,10 @@ def start(engine_type):
     __load_modules()
     __load_configurations()
     __load_grammars()
+    __create_callbacks()
 
 
 def shutdown():
+    __destroy_callbacks()
     __unload_grammars()
     __unload_modules()

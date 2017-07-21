@@ -1,3 +1,4 @@
+import dragonfly.timer
 from dragonfly import *
 from unit import Unit
 
@@ -7,7 +8,7 @@ class ExampleUnit(Unit):
         Unit.__init__(self, "example_grammar")
 
     def init(self):
-        Unit.init(self)
+        pass
 
     def create_grammar(self, g, t):
         rule = MappingRule(
@@ -20,6 +21,12 @@ class ExampleUnit(Unit):
 
     def load_config(self, config_path):
         pass
+
+    def some_callback(self):
+        print "This gets executed every second"
+
+    def create_callbacks(self):
+        return [(lambda: self.some_callback(), 1)]
 
 def create_unit():
     return ExampleUnit()

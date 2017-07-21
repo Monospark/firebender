@@ -15,6 +15,10 @@ class Unit:
     def engine_types(self):
         return self.__engine_types
 
+    @property
+    def name(self):
+        return self.__class__.__name__
+
     def init(self):
         pass
 
@@ -32,3 +36,6 @@ class Unit:
 
     def create_grammar(self, g, t):
         pass
+
+    def create_callbacks(self):
+        return []
