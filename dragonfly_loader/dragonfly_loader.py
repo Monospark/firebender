@@ -1,7 +1,7 @@
-import sys
+import imp
 import os
 import pkgutil
-import imp
+import sys
 import traceback
 
 import dragonfly
@@ -11,8 +11,6 @@ from dragonfly import *
 import wsr_callbacks
 from json_parser import parse_file
 
-
-__root_path = os.path.dirname(os.path.abspath(__file__))
 __absolute_modules_directory = None
 __absolute_excluded_files = None
 __absolute_config_directory = None
@@ -27,25 +25,25 @@ sys.argv = ["name"]
 
 
 def __load_config():
-    global __root_path
     global __absolute_modules_directory
     global __absolute_excluded_files
     global __absolute_config_directory
 
-    config = parse_file(os.path.join(__root_path, "config.json"))
+    config_dir = os.path.join(os.path.expanduser("~"), "dragonfly_loader")
+    config = parse_file(os.path.join(config_dir, "config.json"))
 
     __absolute_modules_directory = config["modules_dir"]
     if not os.path.isabs(config["modules_dir"]):
-        __absolute_modules_directory = os.path.join(__root_path, config["modules_dir"])
+        __absolute_modules_directory = os.path.join(config_dir, config["modules_dir"])
 
     __absolute_excluded_files = [os.path.join(__absolute_modules_directory, e) for e in config["excluded"]]
 
     __absolute_config_directory = config["config_dir"]
     if not os.path.isabs(config["config_dir"]):
-        __absolute_config_directory = os.path.join(__root_path, config["config_dir"])
+        __absolute_config_directory = os.path.join(config_dir, config["config_dir"])
 
     del i18n.load_path[:]
-    i18n.load_path.append(os.path.join(__root_path, "translations"))
+    i18n.load_path.append(os.path.join(os.path.abspath(__file__), "translations"))
     i18n.load_path.append(os.path.join(__absolute_modules_directory, "translations"))
     i18n.set('locale', config["locale"])
     i18n.set('fallback', 'en')
@@ -107,7 +105,7 @@ def __load_package(path, package_name):
 
 def __load_modules():
     print("\nLoading modules:")
-    __load_package(os.path.join(__root_path, "core"), "core")
+    __load_package(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"), "core")
     __load_package(__absolute_modules_directory, os.path.basename(__absolute_modules_directory))
 
     print("\nInitializing units:")
