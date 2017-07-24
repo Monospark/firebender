@@ -1,6 +1,7 @@
 from dragonfly import *
-from unit import Unit
+
 import dragonfly_loader
+from dragonfly_loader.unit import Unit
 
 
 class LoaderCommands(Unit):

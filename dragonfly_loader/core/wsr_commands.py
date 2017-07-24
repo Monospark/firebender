@@ -1,7 +1,8 @@
-from dragonfly import *
-from unit import Unit
-import dragonfly_loader
 import wsr_connector
+from dragonfly import *
+
+import dragonfly_loader
+from dragonfly_loader.unit import Unit
 
 
 class WsrCommands(Unit):
