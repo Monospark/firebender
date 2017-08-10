@@ -81,12 +81,9 @@ def __add_module(m):
     __loaded_modules[m] = unit
 
 
-def __load_package(path, package_name, depth=0):
+def __load_package(path, package_name):
     if path in __absolute_excluded_files:
         return
-
-    if depth <= 2:
-        sys.path.append(path)
 
     package_tuple = imp.find_module(os.path.basename(path), [os.path.dirname(path)])
     package = imp.load_module(package_name, *package_tuple)
@@ -97,7 +94,7 @@ def __load_package(path, package_name, depth=0):
         if module_path in __absolute_excluded_files:
             continue
         elif ispkg:
-            __load_package(module_path, module_name, depth=depth + 1)
+            __load_package(module_path, module_name)
         elif module_name in sys.modules:
             module = sys.modules[module_name]
             __add_module(module)
@@ -116,8 +113,12 @@ def __load_package(path, package_name, depth=0):
 
 def __load_modules():
     print("\nLoading modules:")
-    __load_package(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"), "dragonfly_loader.core")
-    __load_package(__absolute_modules_directory, os.path.basename(__absolute_modules_directory))
+    directories = [os.path.join(__absolute_modules_directory, f) for f in os.listdir(__absolute_modules_directory)]
+    packages = [f for f in directories if os.path.isdir(f)]
+    sys.path.append(__absolute_modules_directory)
+
+    for package in packages:
+        __load_package(package, os.path.basename(package))
 
     print("\nInitializing units:")
     for unit in __get_units():
