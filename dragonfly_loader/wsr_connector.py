@@ -1,7 +1,7 @@
 import time
 import logging
 import pythoncom
-import dragonfly_loader
+import loader
 
 from dragonfly.engines.backend_sapi5.engine import Sapi5InProcEngine
 
@@ -18,13 +18,13 @@ def init():
     engine = Sapi5InProcEngine()
     engine.connect()
 
-    dragonfly_loader.start(dragonfly_loader.WSR)
+    loader.start(loader.WSR)
 
     engine.speak('beginning loop!')
 
 
 def destroy():
-    dragonfly_loader.shutdown()
+    loader.shutdown()
 
 
 def loop():

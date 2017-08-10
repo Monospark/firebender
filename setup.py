@@ -49,6 +49,7 @@ def install_in_user_directory():
     modules_dir = path.join(config_dir, "modules")
     if not path.exists(modules_dir):
         mkdir(modules_dir)
+    open(path.join(modules_dir, '__init__.py'), 'w+')
 
     modules_config_dir = path.join(config_dir, "config")
     if not path.exists(modules_config_dir):

@@ -9,7 +9,7 @@ import i18n
 from dragonfly import *
 
 import wsr_callbacks
-from json_parser import parse_file
+from json_parser import parse_json
 
 __absolute_modules_directory = None
 __absolute_excluded_files = None
@@ -20,6 +20,7 @@ __grammars = []
 NATLINK = 0
 WSR = 1
 __engine_type = None
+__locale = None
 
 sys.argv = ["name"]
 
@@ -28,9 +29,10 @@ def __load_config():
     global __absolute_modules_directory
     global __absolute_excluded_files
     global __absolute_config_directory
+    global __locale
 
     config_dir = os.path.join(os.path.expanduser("~"), "dragonfly_loader")
-    config = parse_file(os.path.join(config_dir, "config.json"))
+    config = parse_json(os.path.join(config_dir, "config.json"))
 
     __absolute_modules_directory = config["modules_dir"]
     if not os.path.isabs(config["modules_dir"]):
@@ -42,10 +44,8 @@ def __load_config():
     if not os.path.isabs(config["config_dir"]):
         __absolute_config_directory = os.path.join(config_dir, config["config_dir"])
 
-    del i18n.load_path[:]
-    i18n.load_path.append(os.path.join(os.path.abspath(__file__), "translations"))
-    i18n.load_path.append(os.path.join(__absolute_modules_directory, "translations"))
-    i18n.set('locale', config["locale"])
+    __locale = config["locale"]
+    i18n.set('locale', __locale)
     i18n.set('fallback', 'en')
 
 
@@ -53,10 +53,19 @@ def __get_units():
     return [u for u in __loaded_modules.values() if u is not None]
 
 
-def __call_function(unit, name, **kwargs):
+def __get_module_by_unit(unit):
+    for m, u in __loaded_modules.iteritems():
+        if u is unit:
+            return m
+    return None
+
+
+def __call_function(unit, name, output=True, **kwargs):
     try:
         function = getattr(unit, name)
         returned = function(**kwargs)
+        if output:
+            print(" - %s" % unit.name)
         return returned
     except:
         print("Could not call function %s of %s:" % (name, unit))
@@ -66,27 +75,29 @@ def __call_function(unit, name, **kwargs):
 def __add_module(m):
     unit = None
     if "create_unit" in m.__dict__:
-        u = __call_function(m, "create_unit")
+        u = m.create_unit()
         if __engine_type in u.engine_types:
             unit = u
     __loaded_modules[m] = unit
 
 
-def __load_package(path, package_name):
+def __load_package(path, package_name, depth=0):
     if path in __absolute_excluded_files:
         return
+
+    if depth <= 2:
+        sys.path.append(path)
 
     package_tuple = imp.find_module(os.path.basename(path), [os.path.dirname(path)])
     package = imp.load_module(package_name, *package_tuple)
     __loaded_modules[package] = None
-    print(" - pkg %s" % package_name)
     prefix = package_name + "."
     for importer, module_name, ispkg in pkgutil.iter_modules([package_tuple[1]], prefix):
-        module_path = os.path.join(path, module_name)
+        module_path = os.path.join(path, module_name[len(prefix):])
         if module_path in __absolute_excluded_files:
             continue
         elif ispkg:
-            __load_package(os.path.join(path, module_name), module_name)
+            __load_package(module_path, module_name, depth=depth + 1)
         elif module_name in sys.modules:
             module = sys.modules[module_name]
             __add_module(module)
@@ -105,7 +116,7 @@ def __load_package(path, package_name):
 
 def __load_modules():
     print("\nLoading modules:")
-    __load_package(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"), "core")
+    __load_package(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"), "dragonfly_loader.core")
     __load_package(__absolute_modules_directory, os.path.basename(__absolute_modules_directory))
 
     print("\nInitializing units:")
@@ -130,7 +141,6 @@ def __create_callbacks():
     print("\nCreating callbacks:")
     callbacks = []
     for unit in __get_units():
-        print(" - %s" % unit.name)
         callbacks.extend(__call_function(unit, "create_callbacks"))
 
     if __engine_type == NATLINK:
@@ -156,12 +166,15 @@ def __destroy_callbacks():
 def __load_grammars():
     print("\nLoading grammars:")
     for unit in [u for u in __get_units() if u.grammar_name is not None]:
+        translations_directory = os.path.join(os.path.dirname(__get_module_by_unit(unit).__file__), "translations")
+        i18n.load_path.append(translations_directory)
 
         def translate(key):
             return i18n.t(unit.grammar_name + "." + key)
 
         grammar = Grammar(unit.grammar_name)
-        enabled = __call_function(unit, "create_grammar", g=grammar, t=translate)
+        enabled = __call_function(unit, "create_grammar", False, g=grammar, t=translate)
+        del i18n.load_path[:]
         grammar.load()
         if not enabled:
             grammar.disable()
@@ -188,6 +201,10 @@ def get_grammars():
 
 def get_engine_type():
     return __engine_type
+
+
+def get_locale():
+    return __locale
 
 
 def save_module_data():

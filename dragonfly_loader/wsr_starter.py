@@ -1,4 +1,5 @@
-import wsr_connector
+from dragonfly_loader import wsr_connector
+
 
 def main():
     wsr_connector.init()
@@ -8,8 +9,4 @@ def main():
     wsr_connector.destroy()
 
 if __name__ == "__main__":
-    from os import path
-
-    home = path.expanduser('~')
-    config_dir = path.join(home, "dragonfly_loader")
-    print config_dir
+    main()

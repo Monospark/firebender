@@ -1,13 +1,11 @@
-import wsr_connector
 from dragonfly import *
 
-import dragonfly_loader
-from dragonfly_loader.unit import Unit
+from dragonfly_loader import Unit, loader, wsr_connector
 
 
 class WsrCommands(Unit):
     def __init__(self):
-        Unit.__init__(self, "wsr_commands", [dragonfly_loader.WSR])
+        Unit.__init__(self, "wsr_commands", [loader.WSR])
         self.__paused = False
         self.__disabled_grammars = None
 
@@ -17,7 +15,7 @@ class WsrCommands(Unit):
         else:
             return
 
-        enabled_grammars = [g for g in dragonfly_loader.get_grammars() if g.enabled]
+        enabled_grammars = [g for g in loader.get_grammars() if g.enabled]
         for grammar in enabled_grammars:
             grammar.disable()
         self.__disabled_grammars = enabled_grammars

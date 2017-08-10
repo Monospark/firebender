@@ -1,7 +1,7 @@
-import dragonfly_loader
+import loader
 
-dragonfly_loader.start(dragonfly_loader.NATLINK)
+loader.start(loader.NATLINK)
 
 
 def unload():
-    dragonfly_loader.shutdown()
+    loader.shutdown()

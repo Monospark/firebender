@@ -1,9 +1,9 @@
-import dragonfly_loader
+import loader
 
 
 class Unit:
 
-    def __init__(self, grammar_name=None, engine_types=[dragonfly_loader.NATLINK, dragonfly_loader.WSR]):
+    def __init__(self, grammar_name=None, engine_types=[loader.NATLINK, loader.WSR]):
         self.__grammar_name = grammar_name
         self.__engine_types = engine_types
 

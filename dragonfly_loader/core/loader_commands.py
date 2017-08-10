@@ -1,7 +1,5 @@
 from dragonfly import *
-
-import dragonfly_loader
-from dragonfly_loader.unit import Unit
+from dragonfly_loader import Unit, loader
 
 
 class LoaderCommands(Unit):
@@ -11,7 +9,7 @@ class LoaderCommands(Unit):
         self.__loaded_grammars_ref = DictListRef("g", self.__loaded_grammars)
 
     def init(self):
-        self.__loaded_grammars.update(dragonfly_loader.get_grammars())
+        self.__loaded_grammars.update(loader.get_grammars())
 
     def __enable_grammar(g):
         if g.enabled:
@@ -28,13 +26,13 @@ class LoaderCommands(Unit):
             print("Grammar %s disabled" % g.name)
 
     def __reload_data(self):
-        engine_type = dragonfly_loader.engine_type
+        engine_type = loader.engine_type
         enabled_grammar_names = [name for name, g in self.__loaded_grammars.iteritems() if g.enabled]
 
-        data = dragonfly_loader.save_module_data()
-        dragonfly_loader.shutdown()
-        dragonfly_loader.start(engine_type)
-        dragonfly_loader.load_module_data(data)
+        data = loader.save_module_data()
+        loader.shutdown()
+        loader.start(engine_type)
+        loader.load_module_data(data)
 
         for grammar_name in enabled_grammar_names:
             if self.__loaded_grammars.has_key(grammar_name):
