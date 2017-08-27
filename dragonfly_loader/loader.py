@@ -8,7 +8,7 @@ import dragonfly
 import i18n
 from dragonfly import *
 
-import wsr_callbacks
+import callbacks
 from json_parser import parse_json
 
 __absolute_modules_directory = None
@@ -21,8 +21,6 @@ NATLINK = 0
 WSR = 1
 __engine_type = None
 __locale = None
-
-sys.argv = ["name"]
 
 
 def __load_config():
@@ -140,17 +138,11 @@ def __unload_modules():
 
 def __create_callbacks():
     print("\nCreating callbacks:")
-    callbacks = []
+    callback_list = []
     for unit in __get_units():
-        callbacks.extend(__call_function(unit, "create_callbacks"))
+        callback_list.extend(__call_function(unit, "create_callbacks"))
 
-    if __engine_type == NATLINK:
-        for c in callbacks:
-            func, interval = c
-            dragonfly.timer.timer.add_callback(func, interval)
-
-    if __engine_type == WSR:
-        wsr_callbacks.init_callbacks(callbacks)
+    callbacks.init_callbacks(callback_list)
 
 
 def __destroy_callbacks():
@@ -161,7 +153,7 @@ def __destroy_callbacks():
             dragonfly.timer.timer.remove_callback(c.function)
 
     if __engine_type == WSR:
-        wsr_callbacks.destroy_callbacks()
+        callbacks.destroy_callbacks()
 
 
 def __load_grammars():
