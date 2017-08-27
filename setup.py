@@ -1,4 +1,8 @@
 import shutil
+
+import sys
+
+import re
 from setuptools import setup, find_packages
 from codecs import open
 from os import path, mkdir
@@ -11,7 +15,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='dragonfly_loader',
     version='1.0.0',
-    description='A utility that makes it easier to create and use custom dragonfly grammars.',
+    description='A tool for easier dragonfly grammar creation and usage. ',
     long_description=long_description,
     url='https://github.com/monospark/dragonfly_loader',
     author='Christopher Schnick',
@@ -28,13 +32,9 @@ setup(
     keywords='dragonfly voice recogition',
     packages=find_packages(),
     install_requires=['dragonfly', 'i18n'],
-    python_requires='>=2.6, <3',
-    package_data={
-        'dragonfly_loader.core': ['translations/*.yml'],
-    },
     entry_points={
         'console_scripts': [
-            'dragonfly_loader=dragonfly_loader.wsr_starter:main',
+            'dragonfly_loader=dragonfly_loader.cli:main',
         ],
     }
 )
@@ -46,21 +46,23 @@ def install_in_user_directory():
     if not path.exists(config_dir):
         mkdir(config_dir)
 
-    modules_dir = path.join(config_dir, "modules")
-    if not path.exists(modules_dir):
-        mkdir(modules_dir)
-    open(path.join(modules_dir, '__init__.py'), 'w+')
-
     modules_config_dir = path.join(config_dir, "config")
     if not path.exists(modules_config_dir):
         mkdir(modules_config_dir)
 
-    shutil.copyfile('default_config.json', path.join(config_dir, 'config.json'))
+    shutil.copyfile('data/default_config.json', path.join(config_dir, 'config.json'))
 
 
 def install_in_natlink_directory():
-    # TODO
-    pass
+    regex = re.compile('(.+?NatLink\\\\MacroSystem)\\\\core')
+    natlink_dir = None
+    for path_entry in sys.path:
+        if "NatLink" in path_entry:
+            natlink_dir = regex.match(path_entry).group(1)
+
+    if natlink_dir is not None:
+        shutil.copyfile('data/natlink_hook.py', path.join(natlink_dir, '_natlink_hook.py'))
+
 
 install_in_user_directory()
 install_in_natlink_directory()
