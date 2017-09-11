@@ -24,6 +24,21 @@ class Action:
     STOP = 2
     GET_STATUS = 3
     SET_STATUS = 4
+    GET_ENGINE = 5
+
+
+class EngineType:
+    DRAGON = 1
+    WSR = 2
+
+    _names = {
+        DRAGON: "Dragon",
+        WSR: "WSR"
+    }
+
+    @staticmethod
+    def get_string(type):
+        return EngineType._names[type]
 
 
 class Status:
@@ -61,11 +76,6 @@ class Server:
         Server.communicate(Action.STOP)
 
     @staticmethod
-    def natlink_load():
-        if Server.get_status() == Status.INACTIVE:
-            DragonServer(os.getpid())
-
-    @staticmethod
     def get_status():
         try:
             return Server.communicate(Action.GET_STATUS)
@@ -74,19 +84,23 @@ class Server:
 
     @staticmethod
     def get_status_string():
-        return Status.get_message(Server.get_status())
+        status = Server.get_status()
+        if status == Status.INACTIVE:
+            return Status.get_message(status)
+        else:
+            return Status.get_message(status) + " - " + EngineType.get_string(Server.communicate(Action.GET_ENGINE))
 
     @staticmethod
     def set_status(status):
         Server.communicate((Action.SET_STATUS, status))
 
-    def __init__(self):
-        self.__status = Status.INACTIVE
+    def __init__(self, type):
+        self.__type = type
+        self._status = Status.INACTIVE
         self.start_server()
         self.listener = Listener(ADDRESS)
         self.listener._listener._socket.settimeout(TIMEOUT)
         self.loop()
-        self.stop()
 
     def start_server(self):
         pass
@@ -127,13 +141,15 @@ class Server:
             self.stop()
             return Action.ACK
         if message == Action.GET_STATUS:
-            return self.__status
+            return self._status
+        if message == Action.GET_ENGINE:
+            return self.__type
         return None
 
     def handle_data(self, message):
         action, data = message
         if action == Action.SET_STATUS:
-            self.__status = data
+            self._status = data
             return Action.ACK
         return None
 
@@ -142,7 +158,7 @@ class DragonServer(Server):
 
     def __init__(self, pid=None):
         self.pid = pid
-        Server.__init__(self)
+        Server.__init__(self, EngineType.DRAGON)
 
     def start_server(self):
         if self.pid is None:
@@ -162,6 +178,7 @@ class DragonServer(Server):
             if not self.__process.is_running():
                 return
 
+            self.__status = Status.STOPPING_ENGINE
             self.__process.kill()
             time.sleep(5)
             if self.__process.is_running():
@@ -173,15 +190,18 @@ class DragonServer(Server):
 class WsrServer(Server):
     def __init__(self):
         self.__running = True
-        Server.__init__(self)
+        Server.__init__(self, EngineType.WSR)
 
     def start_server(self):
+        self._status = Status.STARTING_ENGINE
         logging.basicConfig(level=logging.INFO)
         engine = Sapi5InProcEngine()
         engine.connect()
 
+        self._status = Status.LOADING_MODULES
         loader.start(loader.WSR)
 
+        self._status = Status.RUNNING
         engine.speak('beginning loop!')
         threading.Thread(target=self.update).start()
 
@@ -193,7 +213,7 @@ class WsrServer(Server):
     def is_active(self):
         return self.__running
 
-    def stop_server(self, force):
+    def stop_server(self):
         self.__running = False
-        time.sleep(0.1)
+        self._status = Status.UNLOADING_MODULES
         loader.shutdown()

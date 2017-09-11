@@ -1,20 +1,20 @@
 import loader
-from server import DragonServer
+from server import Server, Status
 
-DragonServer.natlink_load()
-
-should_load = DragonServer.get_status() != DragonServer.Status.INACTIVE
-if should_load:
-    DragonServer.set_status(DragonServer.Status.LOADING_MODULES)
+should_load = Server.get_status() != Status.INACTIVE
+if not should_load:
+    raise loader.error
+else:
+    Server.set_status(Status.LOADING_MODULES)
     loader.start(loader.NATLINK)
 
-DragonServer.set_status(DragonServer.Status.RUNNING)
+Server.set_status(Status.RUNNING)
 
 
 def unload():
     if should_load:
-        DragonServer.set_status(DragonServer.Status.UNLOADING_MODULES)
+        Server.set_status(Status.UNLOADING_MODULES)
         loader.shutdown()
 
-    DragonServer.set_status(DragonServer.Status.STOPPING_DRAGON)
+    Server.set_status(Status.STOPPING_ENGINE)
 
