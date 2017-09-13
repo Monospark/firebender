@@ -2,6 +2,7 @@ from threading import Thread
 import time
 
 import loader
+import natlink
 
 
 class Callback(object):
@@ -78,12 +79,11 @@ class NatlinkCallbacks(CallbackImplementation):
     def initialize(self, callbacks):
         if callbacks:
             self.__callbacks = callbacks
-            import natlink
             natlink.setTimerCallback(self.__natlink_callback, int(INTERVAL * 1000))
 
     def destroy(self):
-        CallbackImplementation.destroy(self)
-
+        if self.__callbacks:
+            natlink.setTimerCallback(self.__natlink_callback, 0)
 
 __impl = None
 

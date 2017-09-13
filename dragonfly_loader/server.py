@@ -7,9 +7,9 @@ import time
 from multiprocessing import connection
 from multiprocessing.connection import Listener, Client
 from win32process import DETACHED_PROCESS
-
 import psutil
 import pythoncom
+import sys
 from dragonfly.engines.backend_sapi5.engine import Sapi5InProcEngine
 
 import loader
@@ -25,6 +25,8 @@ class Action:
     GET_STATUS = 3
     SET_STATUS = 4
     GET_ENGINE = 5
+    WRITE_OUTPUT = 6
+    WRITE_ERROR = 7
 
 
 class EngineType:
@@ -72,8 +74,22 @@ class Server:
         return received
 
     @staticmethod
-    def stop_server():
+    def send_stop():
         Server.communicate(Action.STOP)
+
+    @staticmethod
+    def write_output(string):
+        try:
+            Server.communicate((Action.WRITE_OUTPUT, string))
+        except socket.error:
+            pass
+
+    @staticmethod
+    def write_error(string):
+        try:
+            Server.communicate((Action.WRITE_ERROR, string))
+        except socket.error:
+            pass
 
     @staticmethod
     def get_status():
@@ -151,24 +167,25 @@ class Server:
         if action == Action.SET_STATUS:
             self._status = data
             return Action.ACK
+        if action == Action.WRITE_OUTPUT:
+            sys.stdout.write(data)
+            return Action.ACK
+        if action == Action.WRITE_ERROR:
+            sys.stderr.write(data)
+            return Action.ACK
         return None
 
 
 class DragonServer(Server):
 
-    def __init__(self, pid=None):
-        self.pid = pid
+    def __init__(self):
         Server.__init__(self, EngineType.DRAGON)
 
     def start_server(self):
-        if self.pid is None:
-            path = "E:\\Program Files (x86)\\Nuance\\NaturallySpeaking13\\Program\\natspeak.exe"
-            popen = subprocess.Popen([path], creationflags=DETACHED_PROCESS)
-            self.__process = psutil.Process(popen.pid)
-            self.__status = Status.STARTING_ENGINE
-        else:
-            self.__status = Status.LOADING_MODULES
-            self.__process = psutil.Process(self.pid)
+        path = "E:\\Program Files (x86)\\Nuance\\NaturallySpeaking13\\Program\\natspeak.exe"
+        popen = subprocess.Popen([path], creationflags=DETACHED_PROCESS)
+        self.__process = psutil.Process(popen.pid)
+        self._status = Status.STARTING_ENGINE
 
     def is_active(self):
         return self.__process.is_running()
@@ -178,11 +195,11 @@ class DragonServer(Server):
             if not self.__process.is_running():
                 return
 
-            self.__status = Status.STOPPING_ENGINE
+            self._status = Status.STOPPING_ENGINE
             self.__process.kill()
             time.sleep(5)
             if self.__process.is_running():
-                pass
+                self.__process.terminate()
 
         threading.Thread(target=terminate_or_kill).start()
 

@@ -22,11 +22,13 @@ def main():
         print Server.get_status_string()
         return
 
-    if "stop" is sys.argv:
-        Server.stop_server()
+    if "stop" in sys.argv:
+        Server.send_stop()
+        return
 
     if not args.shell:
-        modified_arguments = list(sys.argv)
+        modified_arguments = list(sys.argv[1:])
+        modified_arguments.insert(0, "dragonfly_loader")
         modified_arguments.append("-s")
         subprocess.Popen(" ".join(modified_arguments))
         return

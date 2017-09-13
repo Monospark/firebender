@@ -148,12 +148,7 @@ def __create_callbacks():
 def __destroy_callbacks():
     print("\nDestroying callbacks:")
 
-    if __engine_type == NATLINK:
-        for c in list(dragonfly.timer.timer.callbacks):
-            dragonfly.timer.timer.remove_callback(c.function)
-
-    if __engine_type == WSR:
-        callbacks.destroy_callbacks()
+    callbacks.destroy_callbacks()
 
 
 def __load_grammars():
