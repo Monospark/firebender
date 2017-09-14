@@ -10,6 +10,8 @@ from win32process import DETACHED_PROCESS
 import psutil
 import pythoncom
 import sys
+
+import wmi
 from dragonfly.engines.backend_sapi5.engine import Sapi5InProcEngine
 
 import loader
