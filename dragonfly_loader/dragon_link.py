@@ -27,7 +27,7 @@ class NatlinkHook:
         return self.natlink_dir is not None
 
     def execute(self):
-        shutil.copyfile('data/natlink_hook.py', path.join(self.natlink_dir, '_natlink_hook.py'))
+        shutil.copyfile('natlink_hook.py', path.join(self.natlink_dir, '_natlink_hook.py'))
 
     def revert(self):
         os.remove(path.join(self.natlink_dir, '_natlink_hook.py'))
@@ -54,7 +54,17 @@ class LogOutput:
             content_file.write(content)
 
     def revert(self):
-        pass
+        natlink_main = path.join(self.natlink_dir, "core", "natlinkmain.py")
+        content = None
+        with open(natlink_main, 'r') as content_file:
+            content = content_file.read()
+
+        content = content.replace("from dragonfly_loader.server import Server\n", "")
+        content = content.replace("Server.write_output(text)", "natlink.displayText(text, 0)")
+        content = content.replace("Server.write_error(text)", "natlink.displayText(text, 1)")
+
+        with open(natlink_main, 'w') as content_file:
+            content_file.write(content)
 
 
 class DragonData:

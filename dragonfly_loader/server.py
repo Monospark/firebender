@@ -180,12 +180,12 @@ class Server:
 
 class DragonServer(Server):
 
-    def __init__(self):
+    def __init__(self, location):
         Server.__init__(self, EngineType.DRAGON)
+        self.__location = location
 
     def start_server(self):
-        path = "E:\\Program Files (x86)\\Nuance\\NaturallySpeaking13\\Program\\natspeak.exe"
-        popen = subprocess.Popen([path], creationflags=DETACHED_PROCESS)
+        popen = subprocess.Popen([self.__location], creationflags=DETACHED_PROCESS)
         self.__process = psutil.Process(popen.pid)
         self._status = Status.STARTING_ENGINE
 

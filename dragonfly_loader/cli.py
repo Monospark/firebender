@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 import dragon_link
+import json_parser
 from server import Server, DragonServer, WsrServer, Status
 
 
@@ -31,6 +32,7 @@ def main():
             dragon_link.install()
         else:
             dragon_link.uninstall()
+        return
 
     if "stop" in sys.argv:
         Server.send_stop()
@@ -48,7 +50,11 @@ def main():
         return 1
 
     if args.engine == "dragon":
-        DragonServer()
+        data = json_parser.parse_json("dragon_data.json")
+        if data is None:
+            print("Run dragonfly_loader dragon link first.")
+            return 1
+        DragonServer(data["location"])
     else:
         WsrServer()
 
