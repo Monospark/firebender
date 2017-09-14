@@ -1,5 +1,5 @@
 dragonfly_loader
-----------------
+================
 
 dragonfly_loader is a Python package which allows for easier and more flexible creation of `dragonfly <https://github.com/t4ngo/dragonfly>`_ grammars.
 It provides the following features:
@@ -7,7 +7,7 @@ It provides the following features:
 | **Easy installation**
 | Just install the python package and everything will be set up automatically so you can instantly start off with writing and using your grammars.
 |
-| **Command line support**
+| **Command line controls**
 | Control Dragon + NatLink using the command line.
 |
 | **Translation support**
@@ -25,6 +25,7 @@ It provides the following features:
 Quick Start
 -----------
 
+1. 
 
 Full Documentation
 ------------------
