@@ -4,7 +4,6 @@ import pkgutil
 import sys
 import traceback
 
-import dragonfly
 import i18n
 from dragonfly import *
 

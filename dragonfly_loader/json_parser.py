@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 
 def parse_json(json_file, default_content=None):

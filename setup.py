@@ -1,5 +1,6 @@
 from codecs import open
 from os import path
+
 from setuptools import setup, find_packages
 
 here = path.abspath(path.dirname(__file__))
@@ -26,7 +27,7 @@ setup(
     ],
     keywords='dragonfly voice recogition',
     packages=find_packages(),
-    install_requires=['dragonfly', 'i18n'],
+    install_requires=['dragonfly', 'i18n', 'psutil'],
     entry_points={
         'console_scripts': [
             'dragonfly_loader=dragonfly_loader.cli:main',

@@ -12,4 +12,3 @@ def unload():
     if should_load:
         Server.set_status(Status.UNLOADING_MODULES)
         loader.shutdown()
-

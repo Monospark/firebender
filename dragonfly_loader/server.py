@@ -1,17 +1,15 @@
 import logging
-import os
 import socket
 import subprocess
+import sys
 import threading
 import time
 from multiprocessing import connection
 from multiprocessing.connection import Listener, Client
 from win32process import DETACHED_PROCESS
+
 import psutil
 import pythoncom
-import sys
-
-import wmi
 from dragonfly.engines.backend_sapi5.engine import Sapi5InProcEngine
 
 import loader
@@ -179,10 +177,9 @@ class Server:
 
 
 class DragonServer(Server):
-
     def __init__(self, location):
-        Server.__init__(self, EngineType.DRAGON)
         self.__location = location
+        Server.__init__(self, EngineType.DRAGON)
 
     def start_server(self):
         popen = subprocess.Popen([self.__location], creationflags=DETACHED_PROCESS)
