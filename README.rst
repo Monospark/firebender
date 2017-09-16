@@ -20,12 +20,8 @@ It provides the following features:
 | Loads of already ready-to-use grammars for you to use or modify to fit your own needs.
 | The currently included projects are:
 - `dfly_edit <https://github.com/Monospark/dfly_edit>`_
-- ...
-
-Quick Start
------------
-
-1. 
+- `dfly_system <https://github.com/Monospark/dfly_system>`_
+- `dfly_mouse <https://github.com/Monospark/dfly_mouse>`_
 
 Full Documentation
 ------------------
