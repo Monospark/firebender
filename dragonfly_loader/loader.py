@@ -8,42 +8,16 @@ import i18n
 from dragonfly import *
 
 import callbacks
-from json_parser import parse_json
 
-__absolute_modules_directory = None
-__absolute_excluded_files = None
-__absolute_config_directory = None
 __loaded_modules = {}
 __grammars = []
 
 NATLINK = 0
 WSR = 1
 __engine_type = None
-__locale = None
-
-
-def __load_config():
-    global __absolute_modules_directory
-    global __absolute_excluded_files
-    global __absolute_config_directory
-    global __locale
-
-    config_dir = os.path.join(os.path.expanduser("~"), "dragonfly_loader")
-    config = parse_json(os.path.join(config_dir, "config.json"))
-
-    __absolute_modules_directory = config["modules_dir"]
-    if not os.path.isabs(config["modules_dir"]):
-        __absolute_modules_directory = os.path.join(config_dir, config["modules_dir"])
-
-    __absolute_excluded_files = [os.path.join(__absolute_modules_directory, e) for e in config["excluded"]]
-
-    __absolute_config_directory = config["config_dir"]
-    if not os.path.isabs(config["config_dir"]):
-        __absolute_config_directory = os.path.join(config_dir, config["config_dir"])
-
-    __locale = config["locale"]
-    i18n.set('locale', __locale)
-    i18n.set('fallback', 'en')
+locale = None
+modules_directory = None
+configs_directory = None
 
 
 def __get_units():
@@ -79,18 +53,13 @@ def __add_module(m):
 
 
 def __load_package(path, package_name):
-    if path in __absolute_excluded_files:
-        return
-
     package_tuple = imp.find_module(os.path.basename(path), [os.path.dirname(path)])
     package = imp.load_module(package_name, *package_tuple)
     __loaded_modules[package] = None
     prefix = package_name + "."
     for importer, module_name, ispkg in pkgutil.iter_modules([package_tuple[1]], prefix):
         module_path = os.path.join(path, module_name[len(prefix):])
-        if module_path in __absolute_excluded_files:
-            continue
-        elif ispkg:
+        if ispkg:
             __load_package(module_path, module_name)
         elif module_name in sys.modules:
             module = sys.modules[module_name]
@@ -110,9 +79,9 @@ def __load_package(path, package_name):
 
 def __load_modules():
     print("\nLoading modules:")
-    directories = [os.path.join(__absolute_modules_directory, f) for f in os.listdir(__absolute_modules_directory)]
+    directories = [os.path.join(modules_directory, f) for f in os.listdir(modules_directory)]
     packages = [f for f in directories if os.path.isdir(f)]
-    sys.path.append(__absolute_modules_directory)
+    sys.path.append(modules_directory)
 
     for package in packages:
         __load_package(package, os.path.basename(package))
@@ -152,6 +121,8 @@ def __destroy_callbacks():
 
 def __load_grammars():
     print("\nLoading grammars:")
+    i18n.set('locale', locale)
+    i18n.set('fallback', 'en')
     for unit in [u for u in __get_units() if u.grammar_name is not None]:
         translations_directory = os.path.join(os.path.dirname(__get_module_by_unit(unit).__file__), "translations")
         i18n.load_path.append(translations_directory)
@@ -179,7 +150,7 @@ def __unload_grammars():
 def __load_configurations():
     print("\nLoading configurations:")
     for unit in __get_units():
-        __call_function(unit, "load_config", config_path=__absolute_config_directory)
+        __call_function(unit, "load_config", config_path=configs_directory)
 
 
 def get_grammars():
@@ -188,10 +159,6 @@ def get_grammars():
 
 def get_engine_type():
     return __engine_type
-
-
-def get_locale():
-    return __locale
 
 
 def save_module_data():
@@ -213,7 +180,6 @@ def load_module_data(data):
 def start(engine_type):
     global __engine_type
     __engine_type = engine_type
-    __load_config()
     __load_modules()
     __load_configurations()
     __load_grammars()

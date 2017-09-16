@@ -181,6 +181,16 @@ class DragonServer(Server):
         self.__location = location
         Server.__init__(self, EngineType.DRAGON)
 
+    def handle_data(self, message):
+        returned = Server.handle_data(self, message)
+        action, data = message
+        if action == Action.SET_STATUS:
+            if data == Status.LOADING_MODULES:
+                loader.start(loader.NATLINK)
+            if data == Status.UNLOADING_MODULES:
+                loader.shutdown()
+        return returned
+
     def start_server(self):
         popen = subprocess.Popen([self.__location], creationflags=DETACHED_PROCESS)
         self.__process = psutil.Process(popen.pid)

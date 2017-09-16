@@ -1,9 +1,11 @@
 import argparse
+import os
 import subprocess
 import sys
 
 import dragon_link
 import json_parser
+import loader
 from server import Server, DragonServer, WsrServer, Status
 
 
@@ -13,6 +15,9 @@ def main():
     start_group = subparsers.add_parser("start")
     start_group.add_argument("engine", action="store", choices=("dragon", "wsr"))
     start_group.add_argument("-s", "--shell", action="store_true")
+    start_group.add_argument("-l", "--locale", action="store", default="en")
+    start_group.add_argument("-m", "--modules", action="store", default=None)
+    start_group.add_argument("-c", "--configs", action="store", default=None)
 
     stop_group = subparsers.add_parser("stop")
 
@@ -49,11 +54,28 @@ def main():
         print "Server is already running"
         return 1
 
+    if args.modules is None:
+        print("Missing modules parameter")
+        return 1
+    if not os.path.isdir(args.modules):
+        print("modules parameter is not an existing directory")
+        return 1
+    if args.configs is None:
+        print("Missing configs parameter")
+        return 1
+    if not os.path.isdir(args.configs):
+        print("configs parameter is not an existing directory")
+        return 1
+    loader.modules_directory = args.modules
+    loader.configs_directory = args.configs
+    loader.locale = args.locale
+
     if args.engine == "dragon":
         data = json_parser.parse_json("dragon_data.json")
         if data is None:
             print("Run dragonfly_loader dragon link first.")
             return 1
+
         DragonServer(data["location"])
     else:
         WsrServer()
