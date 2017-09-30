@@ -9,11 +9,11 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='dragonfly_loader',
+    name='firebender',
     version='1.0.0',
     description='A tool for easier dragonfly grammar creation and usage. ',
     long_description=long_description,
-    url='https://github.com/monospark/dragonfly_loader',
+    url='https://github.com/monospark/firebender',
     author='Christopher Schnick',
     author_email='c.schnick@monospark.org',
     license='LGPL',
@@ -27,10 +27,10 @@ setup(
     ],
     keywords='dragonfly voice recogition',
     packages=find_packages(),
-    install_requires=['dragonfly', 'i18n', 'psutil'],
+    install_requires=['dragonfire', 'i18n', 'psutil'],
     entry_points={
         'console_scripts': [
-            'dragonfly_loader=dragonfly_loader.cli:main',
+            'firebender=firebender.cli:main',
         ],
     }
 )

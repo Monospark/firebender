@@ -79,11 +79,12 @@ class NatlinkCallbacks(CallbackImplementation):
     def initialize(self, callbacks):
         if callbacks:
             self.__callbacks = callbacks
-            natlink.setTimerCallback(self.__natlink_callback, int(INTERVAL * 1000))
+            #natlink.setTimerCallback(self.__natlink_callback, int(INTERVAL * 1000))
 
     def destroy(self):
         if self.__callbacks:
-            natlink.setTimerCallback(self.__natlink_callback, 0)
+            pass
+            #natlink.setTimerCallback(self.__natlink_callback, 0)
 
 
 __impl = None

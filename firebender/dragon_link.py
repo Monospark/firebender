@@ -47,7 +47,7 @@ class LogOutput:
         with open(natlink_main, 'r') as content_file:
             content = content_file.read()
 
-        content = "from dragonfly_loader.server import Server\n" + content
+        content = "from firebender.server import Server\n" + content
         content = content.replace("natlink.displayText(text, 0)", "Server.write_output(text)")
         content = content.replace("natlink.displayText(text, 1)", "Server.write_error(text)")
 
@@ -60,7 +60,7 @@ class LogOutput:
         with open(natlink_main, 'r') as content_file:
             content = content_file.read()
 
-        content = content.replace("from dragonfly_loader.server import Server\n", "")
+        content = content.replace("from firebender.server import Server\n", "")
         content = content.replace("Server.write_output(text)", "natlink.displayText(text, 0)")
         content = content.replace("Server.write_error(text)", "natlink.displayText(text, 1)")
 

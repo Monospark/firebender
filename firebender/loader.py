@@ -119,7 +119,8 @@ def __destroy_callbacks():
     callbacks.destroy_callbacks()
 
 
-def __load_grammars():
+def __create_grammars():
+    global __grammars
     print("\nLoading grammars:")
     i18n.set('locale', locale)
     i18n.set('fallback', 'en')
@@ -132,10 +133,11 @@ def __load_grammars():
 
         grammar = Grammar(unit.grammar_name)
         enabled = __call_function(unit, "create_grammar", False, g=grammar, t=translate)
-        del i18n.load_path[:]
         grammar.load()
-        if not enabled:
-            grammar.disable()
+        __grammars.append(grammar)
+        del i18n.load_path[:]
+        # if not enabled:
+        #     grammar.disable()
         print(" - %s" % grammar.name)
 
 
@@ -177,13 +179,12 @@ def load_module_data(data):
         __call_function(unit, "load_data", data=data[module.__name__])
 
 
-def start(engine_type):
+def load(engine_type):
     global __engine_type
     __engine_type = engine_type
     __load_modules()
     __load_configurations()
-    __load_grammars()
-    __create_callbacks()
+    __create_grammars()
 
 
 def shutdown():

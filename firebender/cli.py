@@ -5,12 +5,13 @@ import sys
 
 import dragon_link
 import json_parser
-import loader
+import logging
+from firebender import loader
 from server import Server, DragonServer, WsrServer, Status
 
 
 def main():
-    parser = argparse.ArgumentParser(add_help=True, description="Control dragonfly_loader")
+    parser = argparse.ArgumentParser(add_help=True, description="Control firebender")
     subparsers = parser.add_subparsers(help="commands")
     start_group = subparsers.add_parser("start")
     start_group.add_argument("engine", action="store", choices=("dragon", "wsr"))
@@ -45,7 +46,7 @@ def main():
 
     if not args.shell:
         modified_arguments = list(sys.argv[1:])
-        modified_arguments.insert(0, "dragonfly_loader")
+        modified_arguments.insert(0, "firebender")
         modified_arguments.append("-s")
         subprocess.Popen(" ".join(modified_arguments))
         return 0
@@ -70,10 +71,11 @@ def main():
     loader.configs_directory = args.configs
     loader.locale = args.locale
 
+    logging.basicConfig(level=logging.INFO)
     if args.engine == "dragon":
         data = json_parser.parse_json("dragon_data.json")
         if data is None:
-            print("Run dragonfly_loader dragon link first.")
+            print("Run firebender dragon link first.")
             return 1
 
         DragonServer(data["location"])

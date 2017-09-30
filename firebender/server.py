@@ -10,13 +10,13 @@ from win32process import DETACHED_PROCESS
 
 import psutil
 import pythoncom
-from dragonfly.engines.backend_sapi5.engine import Sapi5InProcEngine
+import dragonfire
 
-import loader
+from firebender import loader
 
 TIMEOUT = 0.5
 connection._init_timeout = lambda: time.time() + TIMEOUT
-ADDRESS = ('localhost', 6000)
+ADDRESS = ('localhost', 6001)
 
 
 class Action:
@@ -181,20 +181,18 @@ class DragonServer(Server):
         self.__location = location
         Server.__init__(self, EngineType.DRAGON)
 
-    def handle_data(self, message):
-        returned = Server.handle_data(self, message)
-        action, data = message
-        if action == Action.SET_STATUS:
-            if data == Status.LOADING_MODULES:
-                loader.start(loader.NATLINK)
-            if data == Status.UNLOADING_MODULES:
-                loader.shutdown()
-        return returned
-
     def start_server(self):
+        dragonfly.engines.start_server()
         popen = subprocess.Popen([self.__location], creationflags=DETACHED_PROCESS)
         self.__process = psutil.Process(popen.pid)
         self._status = Status.STARTING_ENGINE
+
+    def handle_data(self, message):
+        action, data = message
+        if action == Action.SET_STATUS:
+            if data == Status.LOADING_MODULES:
+                loader.load(loader.NATLINK)
+        return Server.handle_data(self, message)
 
     def is_active(self):
         return self.__process.is_running()
