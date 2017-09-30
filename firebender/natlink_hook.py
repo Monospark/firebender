@@ -1,7 +1,6 @@
-import natlink
+from dragonfire.engines import get_engine
 
-from server import Server, Status, DragonServer
-from dragonfly.engines import get_engine
+from server import Server, Status
 
 should_load = Server.get_status() == Status.STARTING_ENGINE
 if should_load:

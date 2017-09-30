@@ -8,9 +8,9 @@ from multiprocessing import connection
 from multiprocessing.connection import Listener, Client
 from win32process import DETACHED_PROCESS
 
+import dragonfire
 import psutil
 import pythoncom
-import dragonfire
 
 from firebender import loader
 
@@ -182,7 +182,7 @@ class DragonServer(Server):
         Server.__init__(self, EngineType.DRAGON)
 
     def start_server(self):
-        dragonfly.engines.start_server()
+        dragonfire.engines.start_server()
         popen = subprocess.Popen([self.__location], creationflags=DETACHED_PROCESS)
         self.__process = psutil.Process(popen.pid)
         self._status = Status.STARTING_ENGINE

@@ -1,11 +1,11 @@
 import argparse
+import logging
 import os
 import subprocess
 import sys
 
 import dragon_link
 import json_parser
-import logging
 from firebender import loader
 from server import Server, DragonServer, WsrServer, Status
 

@@ -5,7 +5,7 @@ import sys
 import traceback
 
 import i18n
-from dragonfly import *
+from dragonfire import *
 
 import callbacks
 
